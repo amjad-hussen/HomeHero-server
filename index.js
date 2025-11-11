@@ -28,6 +28,42 @@ app.get('/', (req, res) => {
 async function run() {
     try {
         await client.connect();
+
+        const db = client.db('homehero_db');
+        const servicesCollection = db.collection('services')
+        const usersCollection = db.collection('users');
+        const slideCollection = db.collection('slides')
+
+
+        app.post('/users', async (req, res) => {
+            const newUser = req.body;
+            const email = req.body.email;
+            const query = { email: email }
+            const existingUser = await usersCollection.findOne(query)
+
+            if (existingUser) {
+                res.send({message: 'This user is already exist'})
+            }
+            else {
+                const result = await usersCollection.insertOne(newUser);
+                res.send(result)
+            }
+
+        })
+
+        app.get('/slide', async(req, res) => {
+            const cursor = slideCollection.find();
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+
+        app.get('/service', async(req, res) =>{
+            const cursor = servicesCollection.find().limit(6)
+            const result = await (await cursor.toArray())
+            res.send(result)
+        })
+
+
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
