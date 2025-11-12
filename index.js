@@ -33,7 +33,31 @@ async function run() {
         const servicesCollection = db.collection('services')
         const usersCollection = db.collection('users');
         const slideCollection = db.collection('slides')
+        const featuresCollection = db.collection('features')
 
+
+        app.get('/users', async(req, res) => {
+            const cursor = usersCollection.find()
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+
+        app.patch('/users/:id', async(req, res) => {
+            const id = req.params.id;
+            const updatedUser = req.body
+            console.log('to Update' , id, updatedUser)
+            const query = {_id: new ObjectId(id)}
+            const update = {
+                $set :{
+                    name: updatedUser.name,
+                    photo: updatedUser.photo
+
+                }
+            }
+            const result = await usersCollection.updateOne(query,update)
+            res.send(result)
+
+        })
 
         app.post('/users', async (req, res) => {
             const newUser = req.body;
@@ -51,6 +75,21 @@ async function run() {
 
         })
 
+       app.post('/allService', async(req , res) => {
+            const data = req.body;
+            console.log(data)
+            const result = await servicesCollection.insertOne(data)
+            res.send({
+                success:true
+            })
+        }) 
+
+        app.post('/users', async(req , res) => {
+            const newUser = req.body;
+            const result = await usersCollection.insertOne(newUser) 
+            res.send(result)
+        })
+
         app.get('/slide', async(req, res) => {
             const cursor = slideCollection.find();
             const result = await cursor.toArray()
@@ -59,7 +98,20 @@ async function run() {
 
         app.get('/service', async(req, res) =>{
             const cursor = servicesCollection.find().limit(6)
-            const result = await (await cursor.toArray())
+            const result = await  cursor.toArray()
+            res.send(result)
+        })
+
+
+        app.get('/allService', async(req, res) =>{
+            const cursor = servicesCollection.find();
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+
+        app.get('/features', async(req, res) => {
+            const cursor = featuresCollection.find()
+            const result = await cursor.toArray()
             res.send(result)
         })
         
