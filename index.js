@@ -36,28 +36,30 @@ async function run() {
         const featuresCollection = db.collection('features')
 
 
-        app.get('/users', async(req, res) => {
+        app.get('/users', async (req, res) => {
             const cursor = usersCollection.find()
             const result = await cursor.toArray()
             res.send(result)
         })
 
-        app.patch('/users/:id', async(req, res) => {
+        app.patch('/users/:id', async (req, res) => {
             const id = req.params.id;
             const updatedUser = req.body
-            console.log('to Update' , id, updatedUser)
-            const query = {_id: new ObjectId(id)}
+            console.log('to Update', id, updatedUser)
+            const query = { _id: new ObjectId(id) }
             const update = {
-                $set :{
+                $set: {
                     name: updatedUser.name,
                     photo: updatedUser.photo
 
                 }
             }
-            const result = await usersCollection.updateOne(query,update)
+            const result = await usersCollection.updateOne(query, update)
             res.send(result)
 
         })
+        
+
 
         app.post('/users', async (req, res) => {
             const newUser = req.body;
@@ -66,7 +68,7 @@ async function run() {
             const existingUser = await usersCollection.findOne(query)
 
             if (existingUser) {
-                res.send({message: 'This user is already exist'})
+                res.send({ message: 'This user is already exist' })
             }
             else {
                 const result = await usersCollection.insertOne(newUser);
@@ -75,44 +77,61 @@ async function run() {
 
         })
 
-       app.post('/allService', async(req , res) => {
+        app.post('/allService', async (req, res) => {
             const data = req.body;
             console.log(data)
             const result = await servicesCollection.insertOne(data)
             res.send({
-                success:true
+                success: true
             })
-        }) 
+        })
 
-        app.post('/users', async(req , res) => {
+        app.patch('/service/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedData = req.body;
+            const filter = { _id: new ObjectId(id) };
+            const updated = {
+                $set: {
+                    serviceName: updatedData.serviceName,
+                    category: updatedData.category,
+                    price: updatedData.price,
+                    description: updatedData.description,
+                }
+            };
+
+            const result = await servicesCollection.updateOne(filter, updated);
+            res.send(result);
+        });
+
+        app.post('/users', async (req, res) => {
             const newUser = req.body;
-            const result = await usersCollection.insertOne(newUser) 
+            const result = await usersCollection.insertOne(newUser)
             res.send(result)
         })
 
-        app.delete('/allService/:id', async(req, res) => {
+        app.delete('/allService/:id', async (req, res) => {
             const id = req.params.id;
-            const query =  {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await servicesCollection.deleteOne(query)
             res.send(result)
         })
 
-        app.get('/slide', async(req, res) => {
+        app.get('/slide', async (req, res) => {
             const cursor = slideCollection.find();
             const result = await cursor.toArray()
             res.send(result)
         })
 
-        app.get('/service', async(req, res) =>{
+        app.get('/service', async (req, res) => {
             const cursor = servicesCollection.find().limit(6)
-            const result = await  cursor.toArray()
+            const result = await cursor.toArray()
             res.send(result)
         })
 
-        app.get('/allService', async(req, res) => {
+        app.get('/allService', async (req, res) => {
             const email = req.query.email
             const query = {}
-            if(email) {
+            if (email) {
                 query.email = email
             }
 
@@ -122,21 +141,21 @@ async function run() {
         })
 
 
-        app.get('/allService', async(req, res) =>{
+        app.get('/allService', async (req, res) => {
             const cursor = servicesCollection.find();
             const result = await cursor.toArray()
             res.send(result)
         })
 
-        app.get('/features', async(req, res) => {
+        app.get('/features', async (req, res) => {
             const cursor = featuresCollection.find()
             const result = await cursor.toArray()
             res.send(result)
         })
-        
-        app.get('/service/:id' , async(req, res) => {
+
+        app.get('/service/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await servicesCollection.findOne(query)
             res.send(result)
         })
