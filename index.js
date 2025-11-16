@@ -34,6 +34,7 @@ async function run() {
         const usersCollection = db.collection('users');
         const slideCollection = db.collection('slides')
         const featuresCollection = db.collection('features')
+        const booksCollection = db.collection('book')
 
 
         app.get('/users', async (req, res) => {
@@ -58,7 +59,7 @@ async function run() {
             res.send(result)
 
         })
-        
+
 
 
         app.post('/users', async (req, res) => {
@@ -106,6 +107,20 @@ async function run() {
         app.post('/users', async (req, res) => {
             const newUser = req.body;
             const result = await usersCollection.insertOne(newUser)
+            res.send(result)
+        })
+
+        app.post('/book', async (req, res) => {
+            const newBook = req.body;
+            const query = {
+                serviceId: newBook.serviceId,
+                email: newBook.email
+            }
+            const exists = await booksCollection.findOne(query)
+            if(exists){
+                 return res.send({ exists: true });
+            }
+            const result = await booksCollection.insertOne(newBook)
             res.send(result)
         })
 
