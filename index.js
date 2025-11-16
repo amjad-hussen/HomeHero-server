@@ -117,8 +117,8 @@ async function run() {
                 email: newBook.email
             }
             const exists = await booksCollection.findOne(query)
-            if(exists){
-                 return res.send({ exists: true });
+            if (exists) {
+                return res.send({ exists: true });
             }
             const result = await booksCollection.insertOne(newBook)
             res.send(result)
@@ -167,9 +167,9 @@ async function run() {
             res.send(result)
         })
 
-        app.delete('/book/:id', async(req, res) => {
+        app.delete('/book/:id', async (req, res) => {
             const id = req.params.id
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await booksCollection.deleteOne(query)
             res.send(result)
         })
@@ -191,6 +191,19 @@ async function run() {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await servicesCollection.findOne(query)
+            res.send(result)
+        })
+
+        app.patch('/services/:id/review', async (req, res) => {
+            const id = req.params.id;
+            const review = req.body;
+            const query = { _id: new ObjectId(id) }
+            const update = {
+                $push:{
+                     reviews: review
+                }
+            }
+            const result = await servicesCollection.updateOne(query, update)
             res.send(result)
         })
 
