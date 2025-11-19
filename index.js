@@ -1,15 +1,17 @@
 const express = require('express')
 const cors = require('cors');
+require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port = process.env.PORT || 3000;
+console.log(process.env)
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 
-const uri = "mongodb+srv://simpleDBUsers:TIKd5RWK37CIxWsK@cluster0.4wysv8m.mongodb.net/?appName=Cluster0";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.4wysv8m.mongodb.net/?appName=Cluster0`;
 
 const client = new MongoClient(uri, {
     serverApi: {
@@ -37,55 +39,15 @@ async function run() {
         const booksCollection = db.collection('book')
 
 
-        app.get('/users', async (req, res) => {
-            const cursor = usersCollection.find()
-            const result = await cursor.toArray()
-            res.send(result)
-        })
 
-        app.patch('/users/:id', async (req, res) => {
-            const id = req.params.id;
-            const updatedUser = req.body
-            console.log('to Update', id, updatedUser)
-            const query = { _id: new ObjectId(id) }
-            const update = {
-                $set: {
-                    name: updatedUser.name,
-                    photo: updatedUser.photo
-
-                }
-            }
-            const result = await usersCollection.updateOne(query, update)
-            res.send(result)
-
-        })
-
-
-
-        app.post('/users', async (req, res) => {
-            const newUser = req.body;
-            const email = req.body.email;
-            const query = { email: email }
-            const existingUser = await usersCollection.findOne(query)
-
-            if (existingUser) {
-                res.send({ message: 'This user is already exist' })
-            }
-            else {
-                const result = await usersCollection.insertOne(newUser);
-                res.send(result)
-            }
-
-        })
-
-        app.post('/allService', async (req, res) => {
-            const data = req.body;
-            console.log(data)
-            const result = await servicesCollection.insertOne(data)
-            res.send({
-                success: true
-            })
-        })
+        // app.post('/allService', async (req, res) => {
+        //     const data = req.body;
+        //     console.log(data)
+        //     const result = await servicesCollection.insertOne(data)
+        //     res.send({
+        //         success: true
+        //     })
+        // })
 
         app.patch('/service/:id', async (req, res) => {
             const id = req.params.id;
@@ -104,11 +66,7 @@ async function run() {
             res.send(result);
         });
 
-        app.post('/users', async (req, res) => {
-            const newUser = req.body;
-            const result = await usersCollection.insertOne(newUser)
-            res.send(result)
-        })
+
 
         app.post('/book', async (req, res) => {
             const newBook = req.body;
@@ -143,17 +101,17 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/allService', async (req, res) => {
-            const email = req.query.email
-            const query = {}
-            if (email) {
-                query.email = email
-            }
+        // app.get('/allService', async (req, res) => {
+        //     const email = req.query.email
+        //     const query = {}
+        //     if (email) {
+        //         query.email = email
+        //     }
 
-            const cursor = servicesCollection.find(query)
-            const result = await cursor.toArray()
-            res.send(result)
-        })
+        //     const cursor = servicesCollection.find(query)
+        //     const result = await cursor.toArray()
+        //     res.send(result)
+        // })
 
         app.get('/book', async (req, res) => {
             const email = req.query.email
@@ -175,11 +133,50 @@ async function run() {
         })
 
 
+        // app.get('/allService', async (req, res) => {
+        //     const cursor = servicesCollection.find();
+        //     const result = await cursor.toArray()
+        //     res.send(result)
+        // })
+
+        // app.get('/allService', async (req, res) => {
+        //     const { minPrice, maxPrice } = req.query;
+
+        //     let query = {};
+
+        //     if (minPrice && maxPrice) {
+        //         query.price = {
+        //             $gte: parseInt(minPrice),
+        //             $lte: parseInt(maxPrice)
+        //         };
+        //     }
+
+        //     const result = await serviceCollection.find(query).toArray();
+        //     res.send(result);
+        // });
+
         app.get('/allService', async (req, res) => {
-            const cursor = servicesCollection.find();
-            const result = await cursor.toArray()
-            res.send(result)
-        })
+            const { email, minPrice, maxPrice } = req.query;
+
+            let query = {};
+
+            // Filter by email
+            if (email) {
+                query.email = email;
+            }
+
+            // Filter by price range
+            if (minPrice && maxPrice) {
+                query.price = {
+                    $gte: parseInt(minPrice),
+                    $lte: parseInt(maxPrice)
+                };
+            }
+
+            const result = await servicesCollection.find(query).toArray();
+            res.send(result);
+        });
+
 
         app.get('/features', async (req, res) => {
             const cursor = featuresCollection.find()
@@ -199,8 +196,8 @@ async function run() {
             const review = req.body;
             const query = { _id: new ObjectId(id) }
             const update = {
-                $push:{
-                     reviews: review
+                $push: {
+                    reviews: review
                 }
             }
             const result = await servicesCollection.updateOne(query, update)
